@@ -27,12 +27,12 @@ async function whatHesitation(responses: Responses) {
     const answers = responses
         .filter((r) => r[question].length > 0)
         .map(
-            (r) =>
-                `score: ${r["Are you enjoying Swizec’s Newsletter?"]}\nanswer: ${r[question]}`
+            (r) => r[question]
+            // `score: ${r["Are you enjoying Swizec’s Newsletter?"]}\nanswer: ${r[question]}`
         )
         .join("\n\n");
 
-    const prompt = `We asked our readers "${question}". Here is a list of their answers including a score of how much they enjoy the newsletter. What concerns do people have?\n\n${answers}`;
+    const prompt = `We asked our readers "${question}". Here is a list of their answers. Summarize the answers into common themes and suggest improvements we can make.\n---\n${answers}`;
 
     console.log(prompt);
 
