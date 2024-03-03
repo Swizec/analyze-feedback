@@ -1,32 +1,47 @@
 import ollama from "ollama";
+import { parseArgs } from "util";
+import { parse } from "csv-parse/sync";
+import { readFile } from "fs/promises";
 
-// async function askLLM(model: string, prompt: string, system: string) {
-//     const res = await fetch("http://localhost:11434/api/generate", {
-//         method: "POST",
-//         body: JSON.stringify({
-//             stream: false,
-//             model,
-//             prompt,
-//             system,
-//         }),
-//     });
+async function readAndParseCSV(
+    filePath: string
+): Promise<Array<Record<string, string>>> {
+    // Read the CSV file content
+    const fileContent = await readFile(filePath, { encoding: "utf-8" });
 
-//     return res.json();
-// }
+    // Parse the CSV content
+    // The `columns: true` option tells `csv-parse` to use the first row as headers
+    const records = parse(fileContent, {
+        columns: true,
+        skip_empty_lines: true,
+    });
 
-// const res = await askLLM(
-//     "llama2",
-//     "Who are you?",
-//     "You are a marketing assistant analyzing a reader feedback survey for a newsletter"
-// );
+    // Log the parsed objects or handle them as needed
+    return records as Array<Record<string, string>>;
+}
 
-const response = await ollama.generate({
-    model: "llama2",
-    prompt: "Who are you?",
-    system: "You are a marketing assistant analyzing a reader feedback survey for a newsletter",
-    stream: true,
+const { positionals } = parseArgs({
+    args: Bun.argv,
+    allowPositionals: true,
 });
 
-for await (const part of response) {
-    process.stdout.write(part.response);
+const filePath = positionals[positionals.length - 1];
+if (!filePath.endsWith(".csv")) {
+    throw new Error("You must provide the path to a CSV file");
 }
+
+console.log(`Analyzing ${filePath}`);
+
+const data = await readAndParseCSV(filePath);
+console.log(data);
+
+// const response = await ollama.generate({
+//     model: "llama2",
+//     prompt: "Who are you?",
+//     system: "You are a marketing assistant analyzing a reader feedback survey for a newsletter",
+//     stream: true,
+// });
+
+// for await (const part of response) {
+//     process.stdout.write(part.response);
+// }
