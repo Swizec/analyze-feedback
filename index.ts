@@ -3,9 +3,11 @@ import { parseArgs } from "util";
 import { parse } from "csv-parse/sync";
 import { readFile } from "fs/promises";
 
-async function readAndParseCSV(
-    filePath: string
-): Promise<Array<Record<string, string>>> {
+type Responses = Array<Record<string, string>>;
+const systemPrompt =
+    "You are a marketing assistant analyzing a reader feedback survey for a newsletter";
+
+async function readAndParseCSV(filePath: string): Promise<Responses> {
     // Read the CSV file content
     const fileContent = await readFile(filePath, { encoding: "utf-8" });
 
@@ -17,7 +19,31 @@ async function readAndParseCSV(
     });
 
     // Log the parsed objects or handle them as needed
-    return records as Array<Record<string, string>>;
+    return records as Responses;
+}
+
+async function whatHesitation(responses: Responses) {
+    const question = "What hesitation did you have about subscribing?";
+    const answers = responses
+        .filter((r) => r[question].length > 0)
+        .map(
+            (r) =>
+                `score: ${r["Are you enjoying Swizec’s Newsletter?"]}\nanswer: ${r[question]}`
+        )
+        .join("\n\n");
+
+    const prompt = `We asked our readers "${question}". Here is a list of their answers including a score of how much they enjoy the newsletter. What concerns do people have?\n\n${answers}`;
+
+    console.log(prompt);
+
+    const analysis = await ollama.generate({
+        model: "llama2",
+        prompt,
+        system: systemPrompt,
+        stream: true,
+    });
+
+    return analysis;
 }
 
 const { positionals } = parseArgs({
@@ -33,7 +59,11 @@ if (!filePath.endsWith(".csv")) {
 console.log(`Analyzing ${filePath}`);
 
 const data = await readAndParseCSV(filePath);
-console.log(data);
+
+const hesitation = await whatHesitation(data);
+for await (const part of hesitation) {
+    process.stdout.write(part.response);
+}
 
 // const response = await ollama.generate({
 //     model: "llama2",
