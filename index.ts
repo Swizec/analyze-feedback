@@ -2,6 +2,7 @@ import ollama from "ollama";
 import { parseArgs } from "util";
 import { parse } from "csv-parse/sync";
 import { readFile } from "fs/promises";
+import { differenceInSeconds } from "date-fns";
 
 type Responses = Array<Record<string, string>>;
 const systemPrompt =
@@ -142,12 +143,12 @@ async function highLevelSummary(responses: Responses) {
     ];
 
     let prompt =
-        "We asked our readers a series of questions. Below is a high level summary of responses to each question. Write a short report on what readers think.";
+        "Swizec asked his readers a series of questions. Below is a high level summary of responses to each question. Write a short report on what readers think about the newsletters and what Swizec can improve.";
 
     for (const { q, f } of questions) {
         const summary = await f(responses);
-        console.log(`\n\n## ${q}\n\n${summary}`);
-        prompt += `\n\n## ${q}\n\n${summary}`;
+        console.log(`\n\n## ${q}\n\n${summary.response}`);
+        prompt += `\n\n## ${q}\n\n${summary.response}`;
     }
 
     return ollama.generate({
@@ -172,11 +173,17 @@ console.log(`Analyzing ${filePath}. This might take a while`);
 
 const data = await readAndParseCSV(filePath);
 
+const t1 = new Date();
 const analysis = await highLevelSummary(data);
-
+console.log("\n\n--- analysis ---\n\n");
 for await (const part of analysis) {
     process.stdout.write(part.response);
 }
+
+const t2 = new Date();
+console.log(
+    `Analyis of ${data.length} responses took ${differenceInSeconds(t2, t1)}`
+);
 
 // const response = await ollama.generate({
 //     model: "llama2",
