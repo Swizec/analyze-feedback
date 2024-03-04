@@ -22,8 +22,11 @@ async function readAndParseCSV(filePath: string): Promise<Responses> {
     return records as Responses;
 }
 
-async function whatHesitation(responses: Responses) {
-    const question = "What hesitation did you have about subscribing?";
+async function analyzeQuestion(
+    responses: Responses,
+    question: string,
+    explain: string
+) {
     const answers = responses
         .filter((r) => r[question].length > 0)
         .map(
@@ -32,9 +35,9 @@ async function whatHesitation(responses: Responses) {
         )
         .join("\n\n");
 
-    const prompt = `We asked our readers "${question}". Here is a list of their answers. Summarize the answers into common themes and suggest improvements we can make.\n---\n${answers}`;
+    const prompt = `We asked our readers "${question}". Here is a list of their answers. Summarize the answers into common themes and explain ${explain}.\n---\n${answers}`;
 
-    console.log(prompt);
+    // console.log(prompt);
 
     const analysis = await ollama.generate({
         model: "llama2",
@@ -44,6 +47,62 @@ async function whatHesitation(responses: Responses) {
     });
 
     return analysis;
+}
+
+async function whatHesitation(responses: Responses) {
+    return analyzeQuestion(
+        responses,
+        "What hesitation did you have about subscribing?",
+        "what hesitations readers have before subscribing"
+    );
+}
+
+async function whatLearned(responses: Responses) {
+    return analyzeQuestion(
+        responses,
+        "What have you learned from Swizec’s Newsletter?",
+        "what readers learned from the newsletter"
+    );
+}
+
+async function whatLiked(responses: Responses) {
+    return analyzeQuestion(
+        responses,
+        "What have you liked most about the Swizec’s Newsletter?",
+        "what readers liked about the newsletter"
+    );
+}
+
+async function whatBenefits(responses: Responses) {
+    return analyzeQuestion(
+        responses,
+        "What are some other benefits you got from Swizec’s Newsletter?",
+        "what benefits readers got from the newsletter"
+    );
+}
+
+async function whyRecommend(responses: Responses) {
+    return analyzeQuestion(
+        responses,
+        "Would you recommend Swizec’s Newsletter to a friend or coworker? Why?",
+        "why readers would or wouldn't recommend the newsletter"
+    );
+}
+
+async function whatOtherThoughts(responses: Responses) {
+    return analyzeQuestion(
+        responses,
+        "Any other thoughts you'd like to share about Swizec’s Newsletter?",
+        "how readers suggest we can improve"
+    );
+}
+
+async function whatFor(responses: Responses) {
+    return analyzeQuestion(
+        responses,
+        "What are you going to use this knowledge for?",
+        "how readers intend to leverage the newsletter"
+    );
 }
 
 const { positionals } = parseArgs({
@@ -60,8 +119,8 @@ console.log(`Analyzing ${filePath}`);
 
 const data = await readAndParseCSV(filePath);
 
-const hesitation = await whatHesitation(data);
-for await (const part of hesitation) {
+const analysis = await whatBenefits(data);
+for await (const part of analysis) {
     process.stdout.write(part.response);
 }
 

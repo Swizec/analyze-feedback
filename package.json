@@ -1,18 +1,18 @@
 {
-  "name": "analyze-typeform",
-  "module": "index.ts",
-  "type": "module",
-  "scripts": {
-    "analyze": "bun run index.ts"
-  },
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "csv-parse": "^5.5.5",
-    "ollama": "^0.4.9"
-  }
+    "name": "analyze-feedback",
+    "module": "index.ts",
+    "type": "module",
+    "scripts": {
+        "analyze": "bun run index.ts"
+    },
+    "devDependencies": {
+        "@types/bun": "latest"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {
+        "csv-parse": "^5.5.5",
+        "ollama": "^0.4.9"
+    }
 }
