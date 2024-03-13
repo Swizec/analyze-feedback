@@ -182,7 +182,10 @@ for await (const part of analysis) {
 
 const t2 = new Date();
 console.log(
-    `Analyis of ${data.length} responses took ${differenceInSeconds(t2, t1)}`
+    `\n\nAnalyis of ${data.length} responses took ${differenceInSeconds(
+        t2,
+        t1
+    )} seconds.`
 );
 
 // const response = await ollama.generate({
