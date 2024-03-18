@@ -33,14 +33,14 @@ export async function writeTestimonial(
 
     const prompt = `We asked a ${answererIsA} ${
         questions.length
-    } questions about their experience. Turn these answers into a short testimonial. Keep the ${answererIsA}'s phrasing and make it flow as a sentence. The testimonial should be short and to the point. Write a draft then make it shorter.\n\nHere are the answers:\n\n${answers
+    } questions about their experience. Turn these answers into a short testimonial. Keep the original phrasing. The testimonial should be short and to the point. It should start with a hesitation then highlight benefits that the ${answererIsA} experienced. Finish with why the ${answererIsA} would suggest this to others. Write a draft then make it shorter. Keep phrasing from the original answers.\n\nHere are the answers:\n\n${answers
         .map(({ q, a }) => `Question: ${q}\nAnswer: ${a}`)
         .join("\n\n")}`;
 
     console.log(prompt, "\n\n");
 
     return ollama.generate({
-        model: "llama2",
+        model: "mistral",
         prompt,
         system: systemPrompt,
         stream: true,
